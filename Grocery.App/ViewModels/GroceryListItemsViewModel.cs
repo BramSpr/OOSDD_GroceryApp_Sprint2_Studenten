@@ -5,6 +5,7 @@ using Grocery.Core.Data.Repositories;
 using Grocery.Core.Interfaces.Services;
 using Grocery.Core.Models;
 using System.Collections.ObjectModel;
+using Windows.Security.Cryptography.Core;
 
 namespace Grocery.App.ViewModels
 {
@@ -69,6 +70,15 @@ namespace Grocery.App.ViewModels
         [RelayCommand]
         public void AddProduct(Product product)
         {
+            if (product != null && product.Id > 0 && !MyGroceryListItems.Any(i => i.ProductId == product.Id))
+            {
+                GroceryListItem item = new GroceryListItem(0, groceryList.Id, product.Id, 1);
+                _groceryListItemsService.Add(item);
+                product.Stock--;
+                _productService.Update(product);
+                OnGroceryListChanged(groceryList);
+                GetAvailableProducts();
+            }
             //Controleer of het product bestaat en dat de Id > 0
             //Maak een GroceryListItem met Id 0 en vul de juiste productid en grocerylistid
             //Voeg het GroceryListItem toe aan de dataset middels de _groceryListItemsService
